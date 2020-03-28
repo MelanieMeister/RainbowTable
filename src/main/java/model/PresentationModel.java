@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,7 @@ public class PresentationModel {
             = CHARACTERS.toCharArray();
     MessageDigest md;
     List<Password> rainbowTable = new ArrayList<>();
+    HashMap<String, String> table = new HashMap<>();
     private int passwordLength = 7;
     private int amountOfPasswords = 2000;
     private String targetHash = "1d56a37fb6b08aa709fe90e12ca59e12";
@@ -35,12 +37,91 @@ public class PresentationModel {
         }
     }
 
+//    public void generatePasswordHashes() {
+//        List<Password> passwordList = new ArrayList<>();
+//        String pw1;
+//        for (int i = 0; i < amountOfPasswords; i++) {
+//            String pw = generatePassword();
+//            String hash = getHash(pw);
+//            String reduction = reduction(hash, i);
+//            passwordList.add(new Password(pw, hash, reduction));
+//        }
+//
+//        do {
+//            passwordList = distinct(passwordList);
+//        } while (passwordList.size() != 2000);
+//
+//        rainbowTable = passwordList;
+//    }
+
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    public void generatePasswordHashes() {
+    public List<Password> distinct(List<Password> passwords) {
+        return passwords.stream().filter(distinctByKey(Password::getPassword)).collect(Collectors.toList());
+    }
+
+    public void compare() {
+        Password pw = null;
+        List<Password> passwordList2 = new ArrayList<>();
+        for (int i = 0; i < amountOfPasswords; i++) {
+            String reductionTarget = reduction(targetHash, i);
+            if (reductionTarget.equals(rainbowTable.get(i).getReduction())) {
+                pw = rainbowTable.get(i);
+                passwordList2.add(rainbowTable.get(i));
+            }
+        }
+        if (pw == null) {
+            System.out.println();
+        } else {
+            System.out.println();
+        }
+        int size = passwordList2.size();
+
+        System.out.println();
+    }
+
+    public void compare2() {
+        Password pw = null;
+        List<Password> passwordList2 = new ArrayList<>();
+        System.out.println("ioj");
+//        for (int l = 0;  l< 2000; l++) {
+//            String reduction2 = reduction(targetHash, l);
+//            System.out.println(reduction2);
+//            if("igmt8ml".equals(reduction2)){
+//                System.out.println("ioj");
+//
+//            }
+//        }
+        for (int i = 0; i < amountOfPasswords; i++) {
+            String reductionTarget = reduction(targetHash, i);
+
+            for (int j = 0; j < amountOfPasswords; j++) {
+                if (reductionTarget.equals(rainbowTable.get(j).getReduction())) {
+                    pw = rainbowTable.get(j);
+                    passwordList2.add(rainbowTable.get(j));
+                }
+                if(targetHash.equals(rainbowTable.get(j).getHash())){
+                    pw = rainbowTable.get(j);
+                    passwordList2.add(rainbowTable.get(j));
+                }
+            }
+
+        }
+
+        if (pw == null) {
+            System.out.println();
+        } else {
+            System.out.println();
+        }
+        int size = passwordList2.size();
+
+        System.out.println();
+    }
+
+    public void sdf() {
         List<Password> passwordList = new ArrayList<>();
         String pw1;
         for (int i = 0; i < amountOfPasswords; i++) {
@@ -57,54 +138,34 @@ public class PresentationModel {
         rainbowTable = passwordList;
     }
 
-    public List<Password> distinct(List<Password> passwords) {
-        return passwords.stream().filter(distinctByKey(Password::getPassword)).collect(Collectors.toList());
-    }
 
-    public void compare() {
-        Password pw = null;
-        List<Password> passwordList2 = new ArrayList<>();
-        for (int i = 0; i < amountOfPasswords; i++) {
-            String reductionTarget = reduction(targetHash, i);
-            if(reductionTarget.equals(rainbowTable.get(i).getReduction())){
-                pw = rainbowTable.get(i);
-                passwordList2.add(rainbowTable.get(i));
-            }
-        }
-       if(pw == null){
-           System.out.println();
-       }else{
-           System.out.println();
-       }
-       int size = passwordList2.size();
+    public void generatePasswordHashes() {
+        List<Password> passwordList = new ArrayList<>();
 
-        System.out.println();
-    }
+        for (int i = 0; i < CHARACTERS.length(); i++) {
+            for (int j = 0; j < CHARACTERS.length(); j++) {
+                for (int k = 0; k < CHARACTERS.length(); k++) {
+                    if (passwordList.size() < amountOfPasswords) {
+                        String pw = "0000" + CHARACTERS.toCharArray()[i]
+                                + CHARACTERS.toCharArray()[j]
+                                + CHARACTERS.toCharArray()[k];
 
-    public void compare2() {
-        Password pw = null;
-        List<String> targetReductions = new ArrayList<>();
-        for (int i = 0; i < amountOfPasswords; i++) {
-            targetReductions.add(reduction(targetHash, i));
-        }
-        List<Password> passwordList2 = new ArrayList<>();
-        for (int i = 0; i < amountOfPasswords; i++) {
-            for (int j = 0; j < amountOfPasswords; j++) {
-                if(targetReductions.get(j).equals(rainbowTable.get(i).getReduction())){
-                    pw = rainbowTable.get(i);
-                    passwordList2.add(rainbowTable.get(i));
+                        String hash = getHash(pw);
+                        String reduction = reduction(hash, i);
+                        passwordList.add(new Password(pw, hash, reduction));
+                    } else {
+                        break;
+                    }
+
                 }
+
             }
         }
-        if(pw == null){
-            System.out.println();
-        }else{
-            System.out.println();
-        }
-        int size = passwordList2.size();
 
-        System.out.println();
+        rainbowTable = passwordList;
+
     }
+
     public String reduction(String hash, int step) {
         BigInteger hashAsInteger = ConverterHelper.hashToDec(hash);
         BigInteger length = BigInteger.valueOf(CHARACTERS.length());
