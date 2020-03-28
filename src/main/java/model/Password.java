@@ -4,9 +4,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class Password {
-    private StringProperty password = new SimpleStringProperty();
-    private StringProperty hash = new SimpleStringProperty();
-    private StringProperty reduction = new SimpleStringProperty();
+    private final StringProperty password = new SimpleStringProperty();
+    private final StringProperty hash = new SimpleStringProperty();
+    private final StringProperty reduction = new SimpleStringProperty();
 
     public Password(String password, String hash, String reduction) {
         setPassword(password);
@@ -22,7 +22,7 @@ public class Password {
         return reduction;
     }
 
-    public void setReduction(String reduction) {
+    private void setReduction(String reduction) {
         this.reduction.set(reduction);
     }
 
@@ -34,7 +34,7 @@ public class Password {
         return password;
     }
 
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         this.password.set(password);
     }
 
@@ -46,7 +46,7 @@ public class Password {
         return hash;
     }
 
-    public void setHash(String hash) {
+    private void setHash(String hash) {
         this.hash.set(hash);
     }
 }

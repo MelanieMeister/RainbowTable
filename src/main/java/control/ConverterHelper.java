@@ -10,9 +10,6 @@ public  abstract class ConverterHelper {
 
     //calculate input mod 2
     public static int modulo(BigInteger hashInput, int length) {
-        int result = (int) (hashInput.intValue() % Math.pow(2, length));
-
-
-        return result;
+        return (hashInput.intValue() % length);
     }
 }
