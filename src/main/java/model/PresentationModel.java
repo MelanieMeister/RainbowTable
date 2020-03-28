@@ -150,20 +150,22 @@ public class PresentationModel {
                                 + CHARACTERS.toCharArray()[j]
                                 + CHARACTERS.toCharArray()[k];
 
-                        String hash = getHash(pw);
-                        String reduction = reduction(hash, i);
-                        passwordList.add(new Password(pw, hash, reduction));
+                        //do chain
+                        String hashValue = "";
+                        String lastReductionValue = pw;
+                        for (int l = 0; l < amountOfPasswords; l++) {
+                            hashValue = getHash(lastReductionValue);
+                            String reduction = reduction(hashValue, l);
+                            lastReductionValue = reduction;
+                        }
+                        passwordList.add(new Password(pw, hashValue, lastReductionValue));
                     } else {
                         break;
                     }
-
                 }
-
             }
         }
-
         rainbowTable = passwordList;
-
     }
 
     public String reduction(String hash, int step) {
@@ -177,18 +179,18 @@ public class PresentationModel {
 
         List<BigInteger> reductions = new ArrayList<>();
 
-        String reductionCharacters = "";
+        StringBuilder reductionCharacters = new StringBuilder();
 
         for (int i = 0; i < passwordLength; i++) {
             int position = hashAsInteger.mod(length).intValue();
             reductions.add(hashAsInteger.mod(length));
             hashAsInteger = hashAsInteger.divide(length);
 
-            reductionCharacters = reductionCharacters + CHARACTERS.toCharArray()[position];
+            reductionCharacters.append(CHARACTERS.toCharArray()[position]);
         }
 
 
-        return new StringBuilder(reductionCharacters).reverse().toString();
+        return new StringBuilder(reductionCharacters.toString()).reverse().toString();
     }
 
     /**
