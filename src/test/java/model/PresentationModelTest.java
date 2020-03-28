@@ -3,8 +3,6 @@ package model;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class PresentationModelTest {
 
     @Test
@@ -37,8 +35,7 @@ public class PresentationModelTest {
 //        m.create();
 //        m.createRainbowTable();
      m.generatePasswordHashes();
-       m.compare2();
-//       m.compare();
+       String password = m.compare();
 
       String k =   m.reduction("29c3eea3f305d6b823f562ac4be35217", 0);
       System.out.println();
