@@ -23,7 +23,7 @@ public class PresentationModel {
     /**
      * Generates the passwords for the rainbow table.
      */
-    public void generatePassword() {
+    public void generatePasswords() {
         List<Password> passwordList = new ArrayList<>();
 
         // Generate the 2000 passwords

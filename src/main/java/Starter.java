@@ -13,8 +13,11 @@ public class Starter extends Application {
     @Override
     public void start(Stage primaryStage) throws NoSuchAlgorithmException {
         PresentationModel model = new PresentationModel();
-        model.generatePassword();
+        // Generate passwords for rainbow table
+        model.generatePasswords();
+        // Get possible password for hash
         String password = model.compare(targetHash);
+        // Print
         if(password == null) System.out.print("Es wurde kein mögliches Passwort gefunden.");
         System.out.printf("Das Passwort könnte %s sein.", password);
     }
