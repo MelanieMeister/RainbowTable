@@ -14,55 +14,19 @@ public class PresentationModel {
             = "0123456789abcdefghijklmnopqrstuvwxyz";
     private MessageDigest md;
     private List<Password> rainbowTable = new ArrayList<>();
-    private final int passwordLength = 7;
     private final int amountOfPasswords = 2000;
-    private String targetHash = "1d56a37fb6b08aa709fe90e12ca59e12";
 
-    public PresentationModel() {
-        try {
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+    public PresentationModel() throws NoSuchAlgorithmException {
+        md = MessageDigest.getInstance("MD5");
     }
 
-    public String compare() {
-        String hash;
-        int i = amountOfPasswords;
-        while (i >= 0) {
-            hash = targetHash;
-            for (int j = i; j < amountOfPasswords; j++) {
-                String reductionTarget = reduction(hash, j);
-               List<Password> results = rainbowTable.stream()
-                        .filter(item -> item.getReduction().equals(reductionTarget))
-                        .collect(Collectors.toList());
-
-                if (results != null && results.size() == 1) {
-                    return getPassword(results.get(0), targetHash);
-                }
-                hash = getHash(reductionTarget);
-            }
-            i--;
-        }
-        return null;
-    }
-
-    private String getPassword(Password foundPassWordObject, String targetHash) {
-        String password = foundPassWordObject.getPassword();
-        for (int i = 0; i < amountOfPasswords; i++) {
-            String hash = getHash(password);
-            if (hash.equals(targetHash)) {
-                return password;
-            }
-            password = reduction(hash, i);
-        }
-        return null;
-    }
-
-
-    public void generatePasswordHashes() {
+    /**
+     * Generates the passwords for the rainbow table.
+     */
+    public void generatePassword() {
         List<Password> passwordList = new ArrayList<>();
 
+        // Generate the 2000 passwords
         for (int i = 0; i < CHARACTERS.length(); i++) {
             for (int j = 0; j < CHARACTERS.length(); j++) {
                 for (int k = 0; k < CHARACTERS.length(); k++) {
@@ -71,45 +35,96 @@ public class PresentationModel {
                                 + CHARACTERS.toCharArray()[j]
                                 + CHARACTERS.toCharArray()[k];
 
-                        //do chain
-                        String hashValue = "";
+                        //Do the chain
+                        String hashValue;
                         String lastReductionValue = pw;
                         for (int l = 0; l < amountOfPasswords; l++) {
                             hashValue = getHash(lastReductionValue);
                             lastReductionValue = reduction(hashValue, l);
                         }
-                        passwordList.add(new Password(pw, hashValue, lastReductionValue));
-                    } else {
-                        break;
-                    }
+                        // Add password together with the reduction to list
+                        passwordList.add(new Password(pw, lastReductionValue));
+                        // Stop if rainbow table has 2000 items
+                    } else break;
                 }
             }
         }
+        // Saves list with passwords
         rainbowTable = passwordList;
     }
 
+    /**
+     * Reduces the hash.
+     * @param hash the hash to be reduced
+     * @param step the step for the reduction
+     * @return String of reduction of hash
+     */
     public String reduction(String hash, int step) {
+        int passwordLength = 7;
+        // Convert and add step number to hash
         BigInteger hashAsInteger = ConverterHelper.hashToDec(hash);
-        BigInteger length = BigInteger.valueOf(CHARACTERS.length());
-
-//        hashAsInteger = BigInteger.valueOf(hashAsInteger.intValue()+ step);
-
         hashAsInteger = hashAsInteger.add(BigInteger.valueOf(step));
-
-        List<BigInteger> reductions = new ArrayList<>();
-
         StringBuilder reductionCharacters = new StringBuilder();
+        BigInteger length = BigInteger.valueOf(CHARACTERS.length());
 
         for (int i = 0; i < passwordLength; i++) {
             int position = hashAsInteger.mod(length).intValue();
-            reductions.add(hashAsInteger.mod(length));
             hashAsInteger = hashAsInteger.divide(length);
-
-            reductionCharacters.append(CHARACTERS.toCharArray()[position]);
+            reductionCharacters.insert(0, CHARACTERS.toCharArray()[position]);
         }
 
+        return reductionCharacters.toString();
+    }
 
-        return new StringBuilder(reductionCharacters.toString()).reverse().toString();
+    /**
+     * Finds reduction of targetHash in rainbow table by comparing.
+     * @param targetHash the hash to find a possible password for
+     * @return String of the possible password for the hash
+     */
+    public String compare(String targetHash) {
+        String currentHash;
+        int i = amountOfPasswords;
+        while (i >= 0) {
+            currentHash = targetHash;
+            for (int j = i; j < amountOfPasswords; j++) {
+                String reductionTarget = reduction(currentHash, j);
+                // Filter the rainbow table for the calculated reduction
+                List<Password> results = rainbowTable.stream()
+                        .filter(item -> item.getReduction().equals(reductionTarget))
+                        .collect(Collectors.toList());
+
+                // If the filter found a matching entry in the rainbow table
+                if (results != null && results.size() == 1) {
+                    // Get the possible password
+                    return getPassword(results.get(0), targetHash);
+                }
+                // Overwrite the hast
+                currentHash = getHash(reductionTarget);
+            }
+            i--;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the possible password by generating MD5 hashes and comparing.
+     * @param foundPasswordObject the found item in the rainbow table containing a password and the reduction value
+     * @param targetHash the hash to find the password for
+     * @return String of the password
+     */
+    private String getPassword(Password foundPasswordObject, String targetHash) {
+        // Get the password from the rainbow table item
+        String password = foundPasswordObject.getPassword();
+
+        for (int i = 0; i < amountOfPasswords; i++) {
+            // Generate MD5 hash of current password
+            String hash = getHash(password);
+            // Compare - if true return the password
+            if (hash.equals(targetHash)) return password;
+            // if false overwrite the password with the reduction
+            else password = reduction(hash, i);
+        }
+        return null;
     }
 
     /**
