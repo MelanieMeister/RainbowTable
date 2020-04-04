@@ -86,20 +86,24 @@ public class PresentationModel {
         int i = amountOfPasswords;
         while (i >= 0) {
             currentHash = targetHash;
+            String reductionTarget = "";
+            // Reduction
             for (int j = i; j < amountOfPasswords; j++) {
-                String reductionTarget = reduction(currentHash, j);
-                // Filter the rainbow table for the calculated reduction
-                List<Password> results = rainbowTable.stream()
-                        .filter(item -> item.getReduction().equals(reductionTarget))
-                        .collect(Collectors.toList());
-
-                // If the filter found a matching entry in the rainbow table
-                if (results != null && results.size() == 1) {
-                    // Get the possible password
-                    return getPassword(results.get(0), targetHash);
-                }
+                reductionTarget = reduction(currentHash, j);
                 // Overwrite the hast
                 currentHash = getHash(reductionTarget);
+            }
+            // Find password after last reduction step
+            // Filter the rainbow table for the calculated reduction
+            String finalReductionTarget = reductionTarget;
+            List<Password> results = rainbowTable.stream()
+                    .filter(item -> item.getReduction().equals(finalReductionTarget))
+                    .collect(Collectors.toList());
+
+            // If the filter found a matching entry in the rainbow table
+            if (results != null && results.size() == 1) {
+                // Get the possible password
+                return getPassword(results.get(0), targetHash);
             }
             i--;
         }
