@@ -2,10 +2,22 @@ package model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-
+/**
+ * Password which is a part of te rainbowTable.
+ * each Password contains the password and the
+ * reduction.
+ */
 class Password {
-    private final StringProperty password = new SimpleStringProperty();
-    private final StringProperty reduction = new SimpleStringProperty();
+    /**
+     * The password as plainText.
+     */
+    private final StringProperty
+            password = new SimpleStringProperty();
+    /**
+     * The reduction of the MD-Hash of the password.
+     */
+    private final StringProperty reduction
+            = new SimpleStringProperty();
 
     public Password(String password, String reduction) {
         setPassword(password);

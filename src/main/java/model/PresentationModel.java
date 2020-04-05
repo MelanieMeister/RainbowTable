@@ -6,16 +6,43 @@ import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PresentationModel {
+    /**
+     * all possible characters in a password.
+     */
     private static final String CHARACTERS
             = "0123456789abcdefghijklmnopqrstuvwxyz";
-    private MessageDigest md;
-    private List<Password> rainbowTable = new ArrayList<>();
+    /**
+     * the total amount of password which are in the
+     * rainbowTable.
+     */
     private final int amountOfPasswords = 2000;
+    /**
+     * the digest which is need to create a
+     * MD hash.
+     */
+    private MessageDigest md;
+    /**
+     * This list is the RainbowTable which
+     * contains 2000 passwords.
+     */
+    private List<Password> rainbowTable = new ArrayList<>();
+    /**
+     * The length of all passwords.
+     */
+    private int passwordLength = 7;
 
+    /**
+     * Constructor of the PresentationModel which
+     * init the MD5 to generate Hashes.
+     *
+     * @throws NoSuchAlgorithmException throws if the
+     *                                  hash algorithm doesn't exist
+     */
     public PresentationModel() throws NoSuchAlgorithmException {
         md = MessageDigest.getInstance("MD5");
     }
@@ -27,6 +54,8 @@ public class PresentationModel {
         List<Password> passwordList = new ArrayList<>();
 
         // Generate the 2000 passwords
+        // no need for more loops because it should have just
+        // 2000 passwords so that just the last three characters has to changed
         for (int i = 0; i < CHARACTERS.length(); i++) {
             for (int j = 0; j < CHARACTERS.length(); j++) {
                 for (int k = 0; k < CHARACTERS.length(); k++) {
@@ -55,12 +84,12 @@ public class PresentationModel {
 
     /**
      * Reduces the hash.
+     *
      * @param hash the hash to be reduced
      * @param step the step for the reduction
      * @return String of reduction of hash
      */
     public String reduction(String hash, int step) {
-        int passwordLength = 7;
         // Convert and add step number to hash
         BigInteger hashAsInteger = ConverterHelper.hashToDec(hash);
         hashAsInteger = hashAsInteger.add(BigInteger.valueOf(step));
@@ -78,6 +107,7 @@ public class PresentationModel {
 
     /**
      * Finds reduction of targetHash in rainbow table by comparing.
+     *
      * @param targetHash the hash to find a possible password for
      * @return String of the possible password for the hash
      */
@@ -112,8 +142,9 @@ public class PresentationModel {
 
     /**
      * Gets the possible password by generating MD5 hashes and comparing.
+     *
      * @param foundPasswordObject the found item in the rainbow table containing a password and the reduction value
-     * @param targetHash the hash to find the password for
+     * @param targetHash          the hash to find the password for
      * @return String of the password
      */
     private String getPassword(Password foundPasswordObject, String targetHash) {
@@ -125,7 +156,7 @@ public class PresentationModel {
             String hash = getHash(password);
             // Compare - if true return the password
             if (hash.equals(targetHash)) return password;
-            // if false overwrite the password with the reduction
+                // if false overwrite the password with the reduction
             else password = reduction(hash, i);
         }
         return null;
